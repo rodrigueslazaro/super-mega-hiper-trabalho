@@ -5,7 +5,7 @@
 #include "typedfile.h"
 #include "intserial.h"
 #include "node.h"
-#include "Btree.h"
+#include "BTree.h"
 
 using namespace std;
 
@@ -63,7 +63,7 @@ int main()
                 i = arq.searchLogic(auxNode);
 
                 if (i != 0)
-                    cout << "Valor " << n << " encontrado no registro " << i << ". (Esse indice é o indice logico e nao o indice fisico do arquivo.)\n" << endl;
+                    cout << "Valor " << n << " encontrado no registro " << i << ". (Esse indice Ã© o indice logico e nao o indice fisico do arquivo.)\n" << endl;
                 else
                     cout << "Valor " << n << " nao encontrado.\n" << endl;
 
