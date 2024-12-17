@@ -1,0 +1,150 @@
+# depslib dependency file v1.0
+1570117830 source:/home/samuel/Projetos/typedFile/main.cpp
+	<iostream>
+	<clocale>
+	"header.h"
+	"record.h"
+	"typedfile.h"
+	"intserial.h"
+
+1570067211 source:/home/samuel/Projetos/typedFile/src/header.cpp
+	"header.h"
+
+1570044850 /home/samuel/Projetos/typedFile/include/header.h
+	"serializable.h"
+
+1570044844 /home/samuel/Projetos/typedFile/include/serializable.h
+	<string>
+
+1570109311 /home/samuel/Projetos/typedFile/include/record.h
+	<string>
+	"serializable.h"
+
+1570117830 /home/samuel/Projetos/typedFile/include/typedfile.h
+	<fstream>
+	<type_traits>
+
+1570039086 source:/home/samuel.dias/Projetos/typedFile/main.cpp
+	<iostream>
+	"header.h"
+	"record.h"
+	"typedfile.h"
+
+1570044850 /home/samuel.dias/Projetos/typedFile/include/header.h
+	"serializable.h"
+
+1570044844 /home/samuel.dias/Projetos/typedFile/include/serializable.h
+	<string>
+
+1570045637 /home/samuel.dias/Projetos/typedFile/include/record.h
+	<string>
+	"serializable.h"
+
+1570045509 /home/samuel.dias/Projetos/typedFile/include/typedfile.h
+	<fstream>
+	<type_traits>
+
+1570044864 source:/home/samuel.dias/Projetos/typedFile/src/header.cpp
+	"header.h"
+
+1570069201 source:/home/samuel/Projetos/typedFile/src/intserial.cpp
+	"intserial.h"
+
+1570069193 /home/samuel/Projetos/typedFile/include/intserial.h
+	"serializable.h"
+
+1730504653 source:g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile-clean\src\header.cpp
+	"header.h"
+
+1730504653 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile-clean\include\header.h
+	"serializable.h"
+
+1570044844 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile-clean\include\serializable.h
+	<string>
+
+1730503805 source:g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile-clean\src\intserial.cpp
+	"intserial.h"
+
+1730501909 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile-clean\include\intserial.h
+	"serializable.h"
+
+1730505652 source:g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile-clean\main.cpp
+	<iostream>
+	<clocale>
+	"header.h"
+	"intserial.h"
+
+1730504653 source:g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile\src\header.cpp
+	"header.h"
+
+1730504653 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile\include\header.h
+	"serializable.h"
+
+1570044844 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile\include\serializable.h
+	<string>
+
+1730503805 source:g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile\src\intserial.cpp
+	"intserial.h"
+
+1730501909 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile\include\intserial.h
+	"serializable.h"
+
+1731020740 source:g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile\main.cpp
+	<iostream>
+	<clocale>
+	"header.h"
+	"record.h"
+	"typedfile.h"
+	"intserial.h"
+
+1730829034 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile\include\record.h
+	<string>
+	"serializable.h"
+
+1731020147 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\typedfile\include\typedfile.h
+	<fstream>
+	<type_traits>
+
+1734371896 source:g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\btree - kevenn\main.cpp
+	<iostream>
+	<clocale>
+	"header.h"
+	"record.h"
+	"typedfile.h"
+	"intserial.h"
+	"node.h"
+	"Btree.h"
+
+1730504653 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\btree - kevenn\include\header.h
+	"serializable.h"
+
+1570044844 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\btree - kevenn\include\serializable.h
+	<string>
+
+1734371966 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\btree - kevenn\include\record.h
+	<string>
+	"serializable.h"
+	"node.h"
+
+1734372066 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\btree - kevenn\include\typedfile.h
+	<fstream>
+	<type_traits>
+
+1730501909 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\btree - kevenn\include\intserial.h
+	"serializable.h"
+
+1730504653 source:g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\btree - kevenn\src\header.cpp
+	"header.h"
+
+1730503805 source:g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\btree - kevenn\src\intserial.cpp
+	"intserial.h"
+
+1732737459 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\btree - kevenn\include\node.h
+	<vector>
+
+1734386109 g:\outros computadores\meu laptop\kevenn.pasta\projects\codeblocks\tp-passado\btree - kevenn\include\btree.h
+	<queue>
+	<utility>
+	"node.h"
+	"typedfile.h"
+
