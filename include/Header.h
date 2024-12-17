@@ -1,17 +1,16 @@
 #ifndef HEADER_H
 #define HEADER_H
 
-#include "serializable.h"
+#include "Serializable.h"
 
-
-class header : public serializable {
+class Header : public Serializable {
    public:
-      header();
-      header(const string t, unsigned int v);
-      header(const header &h);
-      virtual ~header();
-      header& operator=(const header &h);
-      bool operator==(const header &h);
+      Header();
+      Header(const string t, unsigned int v);
+      Header(const Header &h);
+      virtual ~Header();
+      Header& operator=(const Header &h);
+      bool operator==(const Header &h);
       unsigned long long int getFirstDeleted() const;
       void setFirstDeleted(unsigned long long int r);
       unsigned long long int getFirstValid() const;

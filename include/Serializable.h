@@ -3,10 +3,10 @@
 #include <string>
 using namespace std;
 
-class serializable {
+class Serializable {
    public:
-      serializable() {}
-      virtual ~serializable() {}
+      Serializable() {}
+      virtual ~Serializable() {}
       virtual string toString() = 0;
       virtual void fromString(string repr) = 0;
       virtual string toXML() = 0;
