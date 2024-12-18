@@ -39,18 +39,16 @@
 			<Add option="-fexceptions" />
 			<Add option="-finput-charset=UTF-8" />
 		</Compiler>
-		<Unit filename="include/BTree.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="include/header.h" />
-		<Unit filename="include/intserial.h" />
-		<Unit filename="include/node.h" />
-		<Unit filename="include/record.h" />
-		<Unit filename="include/serializable.h" />
-		<Unit filename="include/typedfile.h" />
+		<Unit filename="include/BTree.h" />
+		<Unit filename="include/Header.h" />
+		<Unit filename="include/IntSerial.h" />
+		<Unit filename="include/Node.h" />
+		<Unit filename="include/Record.h" />
+		<Unit filename="include/Serializable.h" />
+		<Unit filename="include/TypedFile.h" />
 		<Unit filename="main.cpp" />
-		<Unit filename="src/header.cpp" />
-		<Unit filename="src/intserial.cpp" />
+		<Unit filename="src/Header.cpp" />
+		<Unit filename="src/IntSerial.cpp" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

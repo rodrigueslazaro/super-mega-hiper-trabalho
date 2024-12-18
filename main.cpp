@@ -1,10 +1,10 @@
 #include <iostream>
 #include <clocale>
-#include "header.h"
-#include "record.h"
-#include "typedfile.h"
-#include "intserial.h"
-#include "node.h"
+#include "Header.h"
+#include "Record.h"
+#include "TypedFile.h"
+#include "IntSerial.h"
+#include "Node.h"
 #include "BTree.h"
 
 using namespace std;
@@ -16,9 +16,9 @@ int main()
     setlocale(LC_ALL, "Portuguese");
 
     int op, n;
-    intSerial key;
+    IntSerial key;
 
-    Btree<intSerial, min_degree> b("teste.dat", "TPG", 1);
+    BTree<IntSerial, min_degree> b("teste.dat", "TPG", 1);
 
     if (b.isOpen())
     {

@@ -156,15 +156,15 @@
 	"node.h"
 	"typedfile.h"
 
-1734371896 source:/home/lazaro/Downloads/BTree++_Kevenn_Lazaro/main.cpp
+1734480889 source:/home/lazaro/Downloads/BTree++_Kevenn_Lazaro/main.cpp
 	<iostream>
 	<clocale>
-	"header.h"
-	"record.h"
-	"typedfile.h"
-	"intserial.h"
-	"node.h"
-	"Btree.h"
+	"Header.h"
+	"Record.h"
+	"TypedFile.h"
+	"IntSerial.h"
+	"Node.h"
+	"BTree.h"
 
 1730504653 /home/lazaro/Downloads/BTree++_Kevenn_Lazaro/include/header.h
 	"serializable.h"
@@ -192,4 +192,55 @@
 
 1730503805 source:/home/lazaro/Downloads/BTree++_Kevenn_Lazaro/src/intserial.cpp
 	"intserial.h"
+
+1734479383 source:/home/lazaro/Downloads/BTree++_Kevenn_Lazaro/src/Header.cpp
+	"Header.h"
+
+1734479436 /home/lazaro/Downloads/BTree++_Kevenn_Lazaro/include/Header.h
+	"Serializable.h"
+
+1734479467 /home/lazaro/Downloads/BTree++_Kevenn_Lazaro/include/Serializable.h
+	<string>
+
+1734479383 source:/home/lazaro/Downloads/BTree++_Kevenn_Lazaro/src/IntSerial.cpp
+	"IntSerial.h"
+
+1734479441 /home/lazaro/Downloads/BTree++_Kevenn_Lazaro/include/IntSerial.h
+	"Serializable.h"
+
+1734479383 source:/home/lazaro/Downloads/BTree++_Kevenn_Lazaro/src/Record.cpp
+	"Record.h"
+
+1734481897 /home/lazaro/Downloads/BTree++_Kevenn_Lazaro/include/Record.h
+	<string>
+	"Serializable.h"
+	"Node.h"
+
+1734481852 /home/lazaro/Downloads/BTree++_Kevenn_Lazaro/include/Node.h
+	<vector>
+	"Serializable.h"
+
+1734479318 source:/home/lazaro/Downloads/BTree++_Kevenn_Lazaro/src/Node.cpp
+	"Node.h"
+
+1734481813 /home/lazaro/Downloads/BTree++_Kevenn_Lazaro/include/TypedFile.h
+	<fstream>
+	<type_traits>
+	"Serializable.h"
+	"Record.h"
+	"Header.h"
+
+1734481769 /home/lazaro/Downloads/BTree++_Kevenn_Lazaro/include/BTree.h
+	<queue>
+	<utility>
+	"Node.h"
+	"TypedFile.h"
+
+1734480896 source:/home/lazaro/Downloads/BTree++_Kevenn_Lazaro/src/BTree.cpp
+	"BTree.h"
+	<iostream>
+
+1734480680 source:/home/lazaro/Downloads/BTree++_Kevenn_Lazaro/src/TypedFile.cpp
+	"TypedFile.h"
+	<iostream>
 
