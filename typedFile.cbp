@@ -43,6 +43,7 @@
 		<Unit filename="include/Header.h" />
 		<Unit filename="include/IntSerial.h" />
 		<Unit filename="include/Node.h" />
+		<Unit filename="include/OrderExternal.h" />
 		<Unit filename="include/Record.h" />
 		<Unit filename="include/Serializable.h" />
 		<Unit filename="include/TypedFile.h" />

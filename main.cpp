@@ -6,6 +6,7 @@
 #include "IntSerial.h"
 #include "Node.h"
 #include "BTree.h"
+#include "OrderExternal.h"
 
 using namespace std;
 
@@ -14,6 +15,12 @@ constexpr unsigned int min_degree = 2;
 int main()
 {
     setlocale(LC_ALL, "Portuguese");
+
+    OrderExternal<IntSerial, min_degree> orderExternal("tapes.dat", "TPG", 1);
+    orderExternal.genRandomInput("random");
+
+    //orderDataExternal("random_input_data");
+    //printIntercalationResult();
 
     int op, n;
     IntSerial key;
