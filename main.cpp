@@ -17,7 +17,10 @@ int main()
     setlocale(LC_ALL, "Portuguese");
 
     OrderExternal<IntSerial, min_degree> orderExternal("tapes.dat", "TPG", 1);
+    // gera entrada: arquivo com 3000 dados aleatorios e desordenados
     orderExternal.genRandomInput("random");
+    // roda a ordenacao polifasica
+    orderExternal.orderExternal("random");
 
     //orderDataExternal("random_input_data");
     //printIntercalationResult();
