@@ -29,6 +29,8 @@ class OrderExternal
         bool thereAreActiveTapes(vector<bool> tapesActive);
         bool thereAreFreeBuffers(vector<int> buffer);
         int readFromTape(fstream& tape, int position);
+        pair<int, int> getSmallestBufferValue(vector<int> buffer);
+        void writeToTape(fstream& tape, int value, bool nextBlock);
 
         array<int, MEMORY_SIZE> memory;
 };
@@ -60,6 +62,8 @@ void OrderExternal::orderExternal(const string filename)
 
     bool finished = false;
     array<fstream, NUM_TAPES> tapes;
+
+    // cria as fitas temporarias
     for (unsigned int i = 0; i < NUM_TAPES; ++i) {
         string tapeName = "temp_" + to_string(i) + ".txt";
         tapes[i].open(tapeName, ios::in | ios::out | ios::trunc);
@@ -70,6 +74,7 @@ void OrderExternal::orderExternal(const string filename)
     }
     unsigned int current = 0;
 
+    // preenche as duas fitas iniciais
     while(!finished) {
         finished = readIntoMemory(file);
         if (finished)
@@ -77,6 +82,7 @@ void OrderExternal::orderExternal(const string filename)
         sortInternalMemory();
         fillInitialTapes(tapes, current);
     }
+    // intercala as fitas ate finalizar a ordenacao externa
     intercalateData(tapes);
 
     file.close();
@@ -108,8 +114,7 @@ int OrderExternal::readFromTape(fstream& tape, int position) {
 
     streampos tapePos = tape.tellg();
     if (getline(tape, line)) {
-        // Use a stringstream to split the line into individual numbers
-        cout << "THE LINE: " << endl << line << endl;
+        // splita a linha em ints separados
         istringstream ss(line);
         int number;
         int currentPosition = 0;
@@ -117,18 +122,36 @@ int OrderExternal::readFromTape(fstream& tape, int position) {
         if (position < MEMORY_SIZE)
             tape.seekg(tapePos);
 
-        // Iterate over the numbers in the line
+        // passa por todos os valores da linha
         while (ss >> number) {
-            if (currentPosition == position) {  // If the current position matches, return the number
+            if (currentPosition == position) {  // se estiver na pos certa retorna o valor
                 return number;
             }
             currentPosition++;
         }
     }
 
-    // Return a sentinel value if unable to read the number (in case of EOF or invalid position)
     return -1;
 }
+
+void OrderExternal::writeToTape(fstream& tape, int value, bool nextBlock) {
+    if (!tape.is_open()) {
+        cout << "File is not open." << endl;
+    }
+    if (tape.eof()) {
+        cout << "End of file reached." << endl;
+    }
+    if (tape.fail()) {
+        cout << "Error reading from file." << endl;
+    }
+
+    tape << value << " ";
+
+    if(nextBlock) { // se deve passar para um novo bloco
+        tape << "\n";
+    }
+}
+
 
 void OrderExternal::intercalateData(array<fstream, NUM_TAPES>& tapes) {
     // resetar as fitas que foram manipuladas anteriormente
@@ -138,20 +161,27 @@ void OrderExternal::intercalateData(array<fstream, NUM_TAPES>& tapes) {
     tapes[1].clear();
 
     vector<int> buffer = {-1, -1, -1}; // um espaco de memoria para cada fita
-    vector<bool> tapesActive = {1, 1, 0};
-    vector<int> tapesPosition = {0, 0, 0};
+    //vector<bool> bufferFull = {0, 0, 0}; // representa se o buffer esta com valor util naquela posicao
+    vector<bool> tapesActive = {1, 1, 0}; // represente se a fita esta ativa
+    vector<int> tapesPosition = {0, 0, 0}; // representa a posicao no bloco na fita
     int outputTape = 2;
-    int currentBuffer = 0;
-
+    int shouldBreak = 0;
+    // leia os buffers
     while (thereAreActiveTapes(tapesActive)) {
-        // read an active tape into buffer if available
+        // leia as fitas ativas para o buffer, se tiver buffer disponivel
         while (thereAreFreeBuffers(buffer)) {
-            cout << "FREE BUFFERS? " << thereAreFreeBuffers(buffer) << endl;
             for (int i=0; i < NUM_TAPES; i++) {
-                cout << "THE I " << i << endl;
                 if (tapesActive[i] == 1) { // se a fita estiver ativa
-                    cout << "TAPE " << i << "IS ACTIVE" << endl;
-                    buffer[currentBuffer] = readFromTape(tapes[i], tapesPosition[i]); // leia o valor na posicao correta
+                    for(int b=0; b<NUM_TAPES; b++) { // para cada buffer
+                        if(buffer[b] == -1) { // se o buffer estiver pronto para receber valor
+                            buffer[b] = readFromTape(tapes[i], tapesPosition[i]); // leia o valor na posicao correta
+                            if (buffer[b] == -1) { // entao acabou de ler o arquivo ou deu algum problema
+                                tapesActive[i] = false;
+                            }
+                            //bufferFull[b] = true; // o buffer encheu com valor, entao nao pode mexer mais por enquanto
+                            break; // sai do loop para nao preencher o proximo buffer com a mesma fita
+                        }
+                    }
                     tapesPosition[i]++;
                     if (tapesPosition[i] >= MEMORY_SIZE) { // se tiver acabado o bloco, reseta
                         tapesActive[i] = 0;
@@ -159,20 +189,42 @@ void OrderExternal::intercalateData(array<fstream, NUM_TAPES>& tapes) {
                     }
                 }
             }
-            currentBuffer++;
-            cout << "THE BUFFER" << endl;
             for (int b : buffer) {
                 cout << b << " ";
             }
             cout << endl;
         }
-        tapesActive = {0, 0, 0};
+        // coloca o menor valor do buffer na fita de saida, que é a fita nao ativa
+        for (int i=0; i < NUM_TAPES; i++) {
+            if (tapesActive[i] == 0) { // se a fita nao estiver ativa, ela é a fita de saida
+                // pega o menor valor do buffer e a posicao dele
+                auto [smallestBufferValue, position] = getSmallestBufferValue(buffer);
+                //bufferFull[position] = false; // a posicao esta pronta para receber mais valores
+                writeToTape(tapes[i], smallestBufferValue, false);
+                buffer[position] = -1;
+            }
+        }
+        shouldBreak++;
+        if (shouldBreak>=100){
+            break;
+        }
+        //tapesActive = {0, 0, 0};
     }
-    cout << "CLOSED" << endl;
-    for (int b : buffer) {
-        cout << b << " ";
+
+}
+
+pair<int, int> OrderExternal::getSmallestBufferValue(vector<int> buffer) {
+    int smallestValue = buffer[0];
+    int position = 0;
+
+    for (int i = 1; i < buffer.size(); ++i) {
+        if (buffer[i] < smallestValue) {
+            smallestValue = buffer[i];
+            position = i;
+        }
     }
-    cout << endl;
+
+    return {smallestValue, position};
 }
 
 
