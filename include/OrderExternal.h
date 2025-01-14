@@ -26,7 +26,7 @@ class OrderExternal
         void sortInternalMemory();
         void memoryToTape(array<fstream, NUM_TAPES>& tapes, unsigned int currentTape);
         void fillInitialTapes(array<fstream, NUM_TAPES>& tapes, unsigned int& current);
-        void intercalateData(array<fstream, NUM_TAPES>& tapes);
+        void intercalateData(array<fstream, NUM_TAPES>& tapes, vector<bool> tapesActive, int outputTape, vector<int> bufferTape);
         bool thereAreActiveTapes(vector<bool> tapesActive);
         bool thereAreFreeBuffers(vector<int> buffer);
         //int readFromTape(fstream& tape, int position);
@@ -43,10 +43,11 @@ class OrderExternal
             vector<bool>& tapeHasData,
             int block
         );
-        void bufferToTapeOnce(vector<int>& buffer, array<fstream, NUM_TAPES>& tapes, vector<bool>& isOutputTape, int& numbersWritten);
-        void bufferToTape(vector<int>& buffer, array<fstream, NUM_TAPES>& tapes, vector<bool>& isOutputTape, int& numbersWritten, bool dump);
-        void reactivateTapes(vector<bool>& tapesActive, vector<bool>& tapeHasData, int& outputTape);
+        void bufferToTapeOnce(vector<int>& buffer, array<fstream, NUM_TAPES>& tapes, int outputTape, int& numbersWritten);
+        void bufferToTape(vector<int>& buffer, array<fstream, NUM_TAPES>& tapes, int outputTape, int& numbersWritten, bool dump);
+        void reactivateTapes(vector<bool>& tapesActive, vector<bool>& tapeHasData, int outputTape);
         bool inputTapesHaveData(vector<bool> tapeHasData);
+        void splitData(array<fstream, NUM_TAPES>& tapes, vector<bool> tapesActive);
 
         array<int, MEMORY_SIZE> memory;
 };
@@ -81,7 +82,7 @@ void OrderExternal::orderExternal(const string filename)
 
     // cria as fitas temporarias
     for (unsigned int i = 0; i < NUM_TAPES; ++i) {
-        string tapeName = "temp_" + to_string(i) + ".txt";
+        string tapeName = "tape_" + to_string(i+1) + ".txt";
         tapes[i].open(tapeName, ios::in | ios::out | ios::trunc);
         if (!tapes[i]) {
             cerr << "Unable to create temporary file: " << tapeName << "\n";
@@ -99,10 +100,81 @@ void OrderExternal::orderExternal(const string filename)
         fillInitialTapes(tapes, current);
     }
     // intercala as fitas ate finalizar a ordenacao externa
-    intercalateData(tapes);
+    vector<bool> tapesActive = {1, 1, 0}; // intercala da fita 1 e 2 para 3
+    vector<int> bufferTape = {0, 1, 0};
+    intercalateData(tapes, tapesActive, 2, bufferTape);
+
+    tapesActive = {0, 0, 1}; // splita a fita 3 para a primeira fita inativa para continuar a ordencao
+    splitData(tapes, tapesActive);
+    tapesActive = {1, 0, 1}; // intercala da fita 1 e 3 para a 2
+    bufferTape = {1, 2, 1};
+    // FIX HERE
+    intercalateData(tapes, tapesActive, 1, bufferTape);
 
     file.close();
 }
+
+void OrderExternal::splitData(array<fstream, NUM_TAPES>& tapes, vector<bool> tapesActive) {
+    int tapeToReadFrom = -1;
+    int destinationTape = -1;
+
+    // pega a fita de entrada
+    for (int i = 0; i < NUM_TAPES; ++i) {
+        if (tapesActive[i]) {
+            tapeToReadFrom = i;
+            break;
+        }
+    }
+
+    // pega a fita de saida
+    for (int i = 0; i < NUM_TAPES; ++i) {
+        if (!tapesActive[i]) {
+            destinationTape = i;
+            break;
+        }
+    }
+
+    // encontrou as duas fitas?
+    if (tapeToReadFrom == -1 || destinationTape == -1) {
+        cerr << "Error: Could not determine tapes for splitting.\n";
+        return;
+    }
+    // continua
+
+    // comeca no inicio das duas fitas
+    tapes[tapeToReadFrom].seekg(0, ios::beg);
+    tapes[destinationTape].seekp(0, ios::beg);
+
+    vector<string> lines;
+    string line;
+    while (getline(tapes[tapeToReadFrom], line)) {
+        lines.push_back(line); // pega as linhas da fonte
+    }
+
+    // pega metade das linhas para mover para a outra fita
+    size_t halfSize = lines.size() / 2;
+
+    // escreve a primeira metade na fita de saida
+    tapes[destinationTape].close();
+    tapes[destinationTape].open("tape_" + to_string(destinationTape+1) + ".txt", ios::out | ios::trunc);
+    for (size_t i = halfSize; i < lines.size(); ++i) {
+        tapes[destinationTape] << lines[i] << "\n";
+    }
+
+    // escreve a segunda metade novamente na fita de entrada
+    tapes[tapeToReadFrom].close();
+    tapes[tapeToReadFrom].open("tape_" + to_string(tapeToReadFrom+1) + ".txt", ios::out | ios::trunc);
+    for (size_t i = halfSize; i < lines.size(); ++i) {
+        tapes[tapeToReadFrom] << lines[i] << "\n";
+    }
+
+    tapes[tapeToReadFrom].flush();
+    tapes[destinationTape].flush();
+
+    cout << "Successfully split data: Moved " << halfSize << " lines from tape_"
+         << tapeToReadFrom+1 << " to tape_" << destinationTape+1 << ".\n";
+}
+
 
 bool OrderExternal::thereAreActiveTapes(vector<bool> tapesActive) {
     return tapesActive[0] == 1 || tapesActive[1] == 1 || tapesActive[2] == 1;
@@ -111,44 +183,6 @@ bool OrderExternal::thereAreActiveTapes(vector<bool> tapesActive) {
 bool OrderExternal::thereAreFreeBuffers(vector<int> buffer) {
     return buffer[0] == -1 || buffer[1] == -1 || buffer[2] == -1;
 }
-/*
-int OrderExternal::readFromTape(fstream& tape, int position) {
-    string line;
-
-    if (!tape.is_open()) {
-        cout << "File is not open." << endl;
-        return -1;
-    }
-    if (tape.eof()) {
-        cout << "End of file reached." << endl;
-        return -1;
-    }
-    if (tape.fail()) {
-        cout << "Error reading from file." << endl;
-        return -1;
-    }
-
-    streampos tapePos = tape.tellg();
-    if (getline(tape, line)) {
-        // splita a linha em ints separados
-        istringstream ss(line);
-        int number;
-        int currentPosition = 0;
-
-        if (position <= MEMORY_SIZE)
-            tape.seekg(tapePos);
-
-        // passa por todos os valores da linha
-        while (ss >> number) {
-            if (currentPosition == position) {  // se estiver na pos certa retorna o valor
-                return number;
-            }
-            currentPosition++;
-        }
-    }
-
-    return -1;
-}*/
 
 int OrderExternal::readFromTape(fstream& tape, int rowPosition, int columnPosition) {
     string line;
@@ -187,38 +221,6 @@ int OrderExternal::readFromTape(fstream& tape, int rowPosition, int columnPositi
     cout << "Column position out of range." << endl;
     return -1; // Return error if column is out of range
 }
-
-/*
-int OrderExternal::readFromTape(fstream& tape, int position) {
-    static string currentLine; // Store the current line being processed
-    static istringstream lineStream; // Stream to process the line content
-    static int currentPos = 0; // Current position in the line
-
-    if (!tape.is_open()) {
-        cerr << "Tape is not open." << endl;
-        return -1;
-    }
-
-    // If the current line is exhausted or invalid, read the next line
-    if (currentPos == 0 || !lineStream) {
-        if (!getline(tape, currentLine)) {
-            return -1; // End of file or error
-        }
-        lineStream.clear(); // Reset the stream state
-        lineStream.str(currentLine); // Load the new line into the stream
-    }
-
-    // Skip values until reaching the desired position
-    int value;
-    for (int i = 0; i <= position; ++i) {
-        if (!(lineStream >> value)) {
-            return -1; // End of line or parsing error
-        }
-    }
-
-    currentPos = position + 1; // Update the position
-    return value;
-}*/
 
 void OrderExternal::writeToTape(fstream& tape, int value, bool nextBlock) {
     if (!tape.is_open()) {
@@ -281,10 +283,10 @@ void OrderExternal::fillBuffer(
 
 }
 
-void OrderExternal::bufferToTapeOnce(vector<int>& buffer, array<fstream, NUM_TAPES>& tapes, vector<bool>& isOutputTape, int& numbersWritten) {
+void OrderExternal::bufferToTapeOnce(vector<int>& buffer, array<fstream, NUM_TAPES>& tapes, int outputTape, int& numbersWritten) {
     // coloca o menor valor do buffer na fita de saida, que é a fita nao ativa
     for (int i=0; i < NUM_TAPES; i++) {
-        if (isOutputTape[i] == 1) { // se estamos na fita de saida
+        if (outputTape == i) { // se estamos na fita de saida
             // pega o menor valor do buffer e a posicao dele
             auto [smallestBufferValue, position] = getSmallestBufferValue(buffer);
             cout << "SMALLEST VALUE: " << smallestBufferValue << " POS " << position << endl;
@@ -297,13 +299,13 @@ void OrderExternal::bufferToTapeOnce(vector<int>& buffer, array<fstream, NUM_TAP
     }
 }
 
-void OrderExternal::bufferToTape(vector<int>& buffer, array<fstream, NUM_TAPES>& tapes, vector<bool>& isOutputTape, int& numbersWritten, bool dump) {
+void OrderExternal::bufferToTape(vector<int>& buffer, array<fstream, NUM_TAPES>& tapes, int outputTape, int& numbersWritten, bool dump) {
     if (dump) {
         while (buffer[0] > 0 || buffer[1] > 0 || buffer[2] > 0) {
-            bufferToTapeOnce(buffer, tapes, isOutputTape, numbersWritten);
+            bufferToTapeOnce(buffer, tapes, outputTape, numbersWritten);
         }
     } else {
-        bufferToTapeOnce(buffer, tapes, isOutputTape, numbersWritten);
+        bufferToTapeOnce(buffer, tapes, outputTape, numbersWritten);
     }
     for (int b : buffer) {
         cout << b << " ";
@@ -311,7 +313,7 @@ void OrderExternal::bufferToTape(vector<int>& buffer, array<fstream, NUM_TAPES>&
     cout << endl;
 }
 
-void OrderExternal::reactivateTapes(vector<bool>& tapesActive, vector<bool>& tapeHasData, int& outputTape) {
+void OrderExternal::reactivateTapes(vector<bool>& tapesActive, vector<bool>& tapeHasData, int outputTape) {
     for (int i=0; i< tapesActive.size(); i++) {
         if (tapesActive[i] == 0 and i != outputTape) {
             tapesActive[i] = 1;
@@ -328,7 +330,12 @@ bool OrderExternal::inputTapesHaveData(vector<bool> tapeHasData) {
     return false;
 }
 
-void OrderExternal::intercalateData(array<fstream, NUM_TAPES>& tapes) {
+void OrderExternal::intercalateData(
+    array<fstream, NUM_TAPES>& tapes,
+    vector<bool> tapesActive, // fitas de entrada
+    int outputTape, // fita de saida
+    vector<int> bufferTape // representa a fita que o buffer esta lindo primeiramente
+) {
     // resetar as fitas que foram manipuladas anteriormente
     tapes[0].seekg(0, ios::beg);
     tapes[0].clear();
@@ -336,88 +343,25 @@ void OrderExternal::intercalateData(array<fstream, NUM_TAPES>& tapes) {
     tapes[1].clear();
 
     vector<int> buffer = {-1, -1, -1}; // um espaco de memoria para cada fita
-    vector<int> bufferTape = {0, 1, 0};
-    //vector<bool> bufferFull = {0, 0, 0}; // representa se o buffer esta com valor util naquela posicao
-    vector<bool> tapesActive = {1, 1, 0}; // represente se a fita esta ativa
-    vector<bool> isOutputTape = {0, 0, 1}; // represente se e a fita de saida
     vector<int> tapesPosition = {0, 0, 0}; // representa a posicao no bloco na fita
+    vector<int> originalBufferTape = bufferTape; // configuracao de leitura de fitas original
 
     vector<bool> tapeHasData = {1, 1, 1};
-    int outputTape = 2;
-    int shouldBreak = 0;
     int numbersWritten = 0;
     int block = 0;
 
     // enquanto fitas de entrada tiverem dados
     while (inputTapesHaveData(tapeHasData)) {
-        cout << "LET THE SHOW BEGIN!" << endl;
         fillBuffer(buffer, tapes, tapesActive, bufferTape, tapesPosition, tapeHasData, block); // enche o buffer com dados das fitas ativas
-        cout << "~~~~~~~~~~FINISHED READING BUFFER~~~~~~~~~~~~~~" << endl;
         if (thereAreActiveTapes(tapesActive)) { // se ainda tiver fitas ativas
-            cout << "TIRANDO UM!" << endl;
-            bufferToTape(buffer, tapes, isOutputTape, numbersWritten, 0); // remove 1
-        } else { // se nao tiver mais fitas ativs
-            cout << "TIRANDO TUDO!" << endl;
-            bufferToTape(buffer, tapes, isOutputTape, numbersWritten, 1); // remove o resto que tiver no buffer
+            bufferToTape(buffer, tapes, outputTape, numbersWritten, 0); // remove 1
+        } else { // se nao tiver mais fitas ativas
+            bufferToTape(buffer, tapes, outputTape, numbersWritten, 1); // remove o resto que tiver no buffer
             reactivateTapes(tapesActive, tapeHasData, outputTape);
             block++;
-            bufferTape = {0, 1, 0};
+            bufferTape = originalBufferTape;
         }
-        cout << "TAPES HAVE DATA: " << tapeHasData[0] << " " << tapeHasData[1] << " " << tapeHasData[2] << endl;
-        /*shouldBreak++;
-        if (shouldBreak>1000)
-            break;*/
     }
-/*
-    while (thereAreActiveTapes(tapesActive)) {
-        // leia as fitas ativas para o buffer, se tiver buffer disponivel
-        while (thereAreFreeBuffers(buffer)) { // enquanto tiver buffer disponivel
-            for (int b=0; b<NUM_TAPES; b++) { // para cada buffer
-                //cout << "TAPE " << b << ": " << tapesActive[bufferTape[b]] << endl;
-                if (tapesActive[bufferTape[b]] && buffer[b] == -1) { // se a fita da posicao do buffer esta ativa
-                    //cout << "READING FROM TAPE: " << bufferTape[b] << endl;
-                    buffer[b] = readFromTape(tapes[bufferTape[b]], tapesPosition[bufferTape[b]]); // leia da fita do buffer
-                    tapesPosition[bufferTape[b]]++;
-                }
-                if (tapesPosition[bufferTape[b]] >= 4) { // se o bloco acabou
-                    tapesActive[bufferTape[b]] = false; // a fita nao esta mais ativa
-                    tapesPosition[bufferTape[b]] = 0; // a posicao dela e redefinida
-                    // encontra a proxima fita ativa para substituir pela fita que agora esta inativa
-                    for (int i=0; i<NUM_TAPES; i++) { // para cada buffer
-                        if (tapesActive[bufferTape[i]] == false) { // se a fita do buffer esta inativa
-                            for (int j=0; j<NUM_TAPES; j++) { // percorre todas as fitas
-                                if (tapesActive[j] == true) { // pega a primeira fita ativa encontrada
-                                    bufferTape[i] = tapesActive[j]; // e coloca nas fitas do buffer
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-                //cout << "BUFFER-TAPE: " << bufferTape[0] << " " << bufferTape[1] << " " << bufferTape[2] << endl;
-            }
-            /*
-            shouldBreak++;
-            if (shouldBreak>100) {
-                break;
-            }
-
-
-        for (int b : buffer) {
-            cout << b << " ";
-        }
-        }
-        cout << endl;
-        cout << "TAPES ACTIVE: " << "[" << tapesActive[0] << "]" << "[" << tapesActive[1] << "]" << "[" << tapesActive[2] << "]" << endl;
-
-        cout << endl;
-        shouldBreak++;
-        if (shouldBreak>=100){
-            break;
-        }
-        //tapesActive = {0, 0, 0};
-    }*/
 
 }
 
